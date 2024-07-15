@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        *{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        h2 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        .label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Información del Sisben</h1>
+        <h2>Datos del Sisben</h2>
+        <table>
+            <tr>
+                <th>Campo</th>
+                <th>Valor</th>
+            </tr>
+            <tr>
+                <td class="label">Fecha de Consulta:</td>
+                <td>{{ sisben.fecha_consulta }}</td>
+            </tr>
+            <tr>
+                <td class="label">Ficha:</td>
+                <td>{{ sisben.ficha }}</td>
+            </tr>
+            <tr>
+                <td class="label">Puntaje:</td>
+                <td>{{ sisben.puntaje }}</td>
+            </tr>
+            <tr>
+                <td class="label">Nivel de Pobreza:</td>
+                <td>{{ sisben.nivel_pobreza }}</td>
+            </tr>
+        </table>
+
+        <h2>Datos de la Persona</h2>
+        <table>
+            <tr>
+                <th>Campo</th>
+                <th>Valor</th>
+            </tr>
+            <tr>
+                <td class="label">Nombres:</td>
+                <td>{{ persona.nombres }}</td>
+            </tr>
+            <tr>
+                <td class="label">Apellidos:</td>
+                <td>{{ persona.apellidos }}</td>
+            </tr>
+            <tr>
+                <td class="label">Tipo de Documento:</td>
+                <td>{{ persona.tipo_documento }}</td>
+            </tr>
+            <tr>
+                <td class="label">Número de Documento:</td>
+                <td>{{ persona.numero_documento }}</td>
+            </tr>
+            <tr>
+                <td class="label">Municipio:</td>
+                <td>{{ persona.municipio }}</td>
+            </tr>
+            <tr>
+                <td class="label">Departamento:</td>
+                <td>{{ persona.departamento }}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
