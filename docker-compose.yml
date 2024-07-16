@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    container_name: web
+    depends_on:
+      - nginx
+
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    volumes:
+      - media_volume:/app/media
+    ports:
+      - "80:80"
+
+volumes:
+  media_volume:
