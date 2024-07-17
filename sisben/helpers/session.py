@@ -34,7 +34,7 @@ class SisbenSession():
             token = soup.find('input', {'name': '__RequestVerificationToken'})['value']
             return token
         except Exception as e:
-            return str('No se pudo obtener el token de la página web.')
+            return str('No se pudo concretar la consulta del Sisben. Intente más tarde.')
         
     def make_request(self, docType, docNumber):
         try:
@@ -46,11 +46,11 @@ class SisbenSession():
             response = self.session.post(self.initial_url, data=data, cookies=self.session.cookies)
             
             if response.status_code != 200:
-                raise Exception('No se pudo realizar la consulta del Sisben.')
+                raise ValueError('Lo sentimos, estamos teniendo problemas con la consulta del Sisben. Intentelo más tarde. Si el problema persiste, comuníquese con el administrador del servicio.')
             
             return response
         except Exception as e:
-            return str('No se pudo realizar la consulta del Sisben.')
+            raise
     
     def get_sisben(self, docType, docNumber):
         try:
@@ -61,11 +61,8 @@ class SisbenSession():
             fecha_consulta = soup.find('p', class_='campo1 text-right rounded font-weight-bold float-right')
 
             if fecha_consulta is None:
-                return {
-                    'status_code': 400,
-                    'error': f'El tipo de identificación: {self.get_types_document()[str(docType)]}, con el número de documento: {docNumber}. NO se encuentra en la base del Sisben IV',
-                }
-
+                raise ValueError(f'El tipo de identificación: {self.get_types_document()[str(docType)]}, con el número de documento: {docNumber}. NO se encuentra en la base del Sisben IV')
+            
             fecha_consulta = soup.find('p', class_='campo1 text-right rounded font-weight-bold float-right').text.strip()
             ficha = soup.find_all('p', class_='campo1 text-right rounded font-weight-bold float-right')[1].text.strip()
             puntaje = soup.find('p', class_='text-uppercase font-weight-bold text-white').text.strip()
@@ -78,8 +75,6 @@ class SisbenSession():
             numero_documento = soup.find('p', string='Número de documento:').find_next_sibling('p').text.strip()
             municipio = soup.find('p', string='Municipio:').find_next_sibling('p').text.strip()
             departamento = soup.find('p', string='Departamento:').find_next_sibling('p').text.strip()
-
-
 
             return {
                 'status_code': res.status_code,
@@ -99,5 +94,5 @@ class SisbenSession():
                 }
             }
         except Exception as e:
-            raise Exception('No se pudo obtener la información del Sisben.')
+            raise
     

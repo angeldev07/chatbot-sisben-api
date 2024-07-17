@@ -5,6 +5,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from weasyprint import HTML
 from sisben.helpers.session import SisbenSession
+from sisben.utils.get_sisben_fns import validateParams, generar_pdf
 import os 
 
 session = SisbenSession()
@@ -12,10 +13,13 @@ session = SisbenSession()
 @api_view(['GET'])
 def sisben(request: Request):
     # Obtiene el tipo de documento y el número de documento de la consulta
-    type = request.query_params.get('t')
-    id = request.query_params.get('id')
+    docType = request.query_params.get('docType')
+    numDoc = request.query_params.get('numDoc')
     try:
-        data = session.get_sisben(type, id)
+        # Valida los parámetros de entrada
+        validateParams(docType, numDoc, session)
+
+        data = session.get_sisben(docType, numDoc)
 
         if data['status_code'] != 200:
             return Response(data, status=data['status_code'])
@@ -25,21 +29,19 @@ def sisben(request: Request):
             'sisben': data['sisben'],
         }
 
-        html_string = render_to_string('sisben.html', context)
+        # Genera el PDF de la consulta del Sisben
+        download_url = generar_pdf(request, context, numDoc)
 
-        # Genera el PDF usando WeasyPrint
-        pdf_file = HTML(string=html_string).write_pdf()
+        if settings.DEBUG:
+            return Response(f'http://localhost:8000{download_url}', status=200)
 
-        # Guarda el PDF en el directorio 'media' de tu proyecto
-        file_path = os.path.join(settings.MEDIA_ROOT, f'{id}.pdf')
-        with open(file_path, 'wb') as f:
-            f.write(pdf_file)
-
-        # Retorna la URL del archivo para descargar
-        download_url = settings.MEDIA_URL + f'{id}.pdf'
-
-        context['download_url'] = download_url
-        return Response(context, status=200)
+        return Response(f'{os.environ.get('IP_SERVER')}{download_url}', status=200)
+    except ValueError as ve:
+        return Response(str(ve), status=400)
     except Exception as e:
         e.with_traceback()
-        return Response(data={'error': str(e)}, status=500)
+        return Response(str(e), status=500)
+
+@api_view(['GET'])
+def get_message(request: Request):
+    return Response('Hola mundo!!!', status=200)

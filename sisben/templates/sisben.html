@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -10,17 +11,13 @@
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             color: #333;
             margin: 0;
-            padding: 20px;
         }
         .container {
-            max-width: 800px;
             margin: auto;
             background: #fff;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         h1 {
             text-align: center;
@@ -47,17 +44,32 @@
         .label {
             font-weight: bold;
         }
+        .img{
+            display: block;
+        }
+        .img-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
+        <div class="img-container">
+            <div>
+                <img src="{% static 'img/sisben.png' %}" width="200px"  class="img">
+            </div>
+            <div>
+                <img src="{% static 'img/alcaldia_logo.jpg' %}" width="80px">
+            </div>
+        </div>
+        <hr>
+        <br>
         <h1>Información del Sisben</h1>
         <h2>Datos del Sisben</h2>
         <table>
-            <tr>
-                <th>Campo</th>
-                <th>Valor</th>
-            </tr>
             <tr>
                 <td class="label">Fecha de Consulta:</td>
                 <td>{{ sisben.fecha_consulta }}</td>
@@ -76,12 +88,8 @@
             </tr>
         </table>
 
-        <h2>Datos de la Persona</h2>
+        <h2 style="margin: .5rem 0;">Datos de la Persona</h2>
         <table>
-            <tr>
-                <th>Campo</th>
-                <th>Valor</th>
-            </tr>
             <tr>
                 <td class="label">Nombres:</td>
                 <td>{{ persona.nombres }}</td>
@@ -107,6 +115,10 @@
                 <td>{{ persona.departamento }}</td>
             </tr>
         </table>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 1rem;">
+        <span>Desarrollado por</span>
+        <img src="{% static 'img/emsitel_logo.png' %}" width="80px" style="margin-left: 1rem;" >
     </div>
 </body>
 </html>
