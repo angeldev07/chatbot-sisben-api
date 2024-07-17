@@ -24,7 +24,18 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# ===============================================================================================================================
+# Configuración de REST_FRAMEWORK
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    # Otras configuraciones...
+}
+
+# ===============================================================================================================================
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ===============================================================================================================================
 # Logging configuration

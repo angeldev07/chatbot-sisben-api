@@ -48,6 +48,7 @@ LOCAL_MIDDLEWARE = [
 
 THIRD_PARTY_MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 MIDDLEWARE = THIRD_PARTY_MIDDLEWARE + BASE_MIDDLEWARE + LOCAL_MIDDLEWARE 
@@ -118,6 +119,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # =============================================================================================================================== 
 # Media files folder
