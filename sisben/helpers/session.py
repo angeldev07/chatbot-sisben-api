@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 class SisbenSession():
 
     def __init__(self):
-        self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsultas'
+        self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsulta'
         self.critical_error_mssg = 'Lo sentimos, estamos teniendo problemas con la consulta del Sisben. Intentelo más tarde. Si el problema persiste, comuníquese con el administrador del servicio.'
         self.session = requests.Session()
         self.verify_token = self.get_token_from_request()
@@ -110,5 +110,5 @@ class SisbenSession():
                 }
             }
         except Exception as e:
-            raise ValueError(self.critical_error_mssg)
+            raise 
     

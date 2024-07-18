@@ -85,6 +85,7 @@ target/
 __pycache__/
 local_settings.py
 
+logs/response_logs.txt
 .env
 .venv
 db.sqlite3
