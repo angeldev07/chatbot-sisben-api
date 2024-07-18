@@ -1,16 +1,14 @@
-from django.template.loader import render_to_string
 from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
-from weasyprint import HTML
 from sisben.helpers.session import SisbenSession
 from sisben.utils.get_sisben_fns import validateParams, generar_pdf
 import os 
 
 session = SisbenSession()
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def sisben(request: Request):
     # Obtiene el tipo de documento y el número de documento de la consulta
     docType = request.query_params.get('docType')
@@ -22,7 +20,7 @@ def sisben(request: Request):
         data = session.get_sisben(docType, numDoc)
 
         if data['status_code'] != 200:
-            return Response(data, status=data['status_code'])
+            return Response(data, status=200, content_type='text/plain')
         
         context = {
             'persona': data['persona'],
@@ -33,15 +31,14 @@ def sisben(request: Request):
         download_url = generar_pdf(request, context, numDoc)
 
         if settings.DEBUG:
-            return Response(f'http://localhost:8000{download_url}', status=200)
+            return Response(f'http://localhost:8000{download_url}', status=200, content_type='text/plain')
 
-        return Response(f'{os.environ.get('IP_SERVER')}{download_url}', status=200)
+        return Response(f'{os.environ.get('IP_SERVER')}{download_url}', status=200, content_type='text/plain')
     except ValueError as ve:
-        return Response(str(ve), status=400)
+        return Response(str(ve), status=200, content_type='text/plain')
     except Exception as e:
-        e.with_traceback()
-        return Response(str(e), status=500)
+        return Response(str(e), status=200, content_type='text/plain')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def get_message(request: Request):
-    return Response('Hola mundo!!!', status=200)
+    return Response('Hola mundo!!!', status=200, content_type='text/plain')

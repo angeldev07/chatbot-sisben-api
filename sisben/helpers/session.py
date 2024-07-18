@@ -4,7 +4,14 @@ from bs4 import BeautifulSoup
 class SisbenSession():
 
     def __init__(self):
-        self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsulta'
+        self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsultas'
+        self.critical_error_mssg = 'Lo sentimos, estamos teniendo problemas con la consulta del Sisben. Intentelo más tarde. Si el problema persiste, comuníquese con el administrador del servicio.'
+        self.session = requests.Session()
+        self.verify_token = self.get_token_from_request()
+
+    def reset_session(self):
+        self.session = self.session.close() # Cerrar la sesión actual
+        # Crear una nueva sesión y obtenemos el token de esa nueva sesión
         self.session = requests.Session()
         self.verify_token = self.get_token_from_request()
 
@@ -30,27 +37,36 @@ class SisbenSession():
         """
         try:
             response = self.session.get(self.initial_url)
+            response.raise_for_status()
+            # si no ocurre una excepción, se extrae el token
             soup = BeautifulSoup(response.content, 'html.parser')
             token = soup.find('input', {'name': '__RequestVerificationToken'})['value']
             return token
         except Exception as e:
-            return str('No se pudo concretar la consulta del Sisben. Intente más tarde.')
+            return None
         
     def make_request(self, docType, docNumber):
         try:
+
+            if self.verify_token is None:
+                self.reset_session()
+                raise ValueError(self.critical_error_mssg)
+
             data = {
                 '__RequestVerificationToken': self.verify_token,
                 'TipoID': docType,
                 'documento': docNumber,
             }
             response = self.session.post(self.initial_url, data=data, cookies=self.session.cookies)
-            
+
+            response.raise_for_status()
+
             if response.status_code != 200:
-                raise ValueError('Lo sentimos, estamos teniendo problemas con la consulta del Sisben. Intentelo más tarde. Si el problema persiste, comuníquese con el administrador del servicio.')
+                raise ValueError(self.critical_error_mssg)
             
             return response
         except Exception as e:
-            raise
+            raise ValueError(self.critical_error_mssg)
     
     def get_sisben(self, docType, docNumber):
         try:
@@ -94,5 +110,5 @@ class SisbenSession():
                 }
             }
         except Exception as e:
-            raise
+            raise ValueError(self.critical_error_mssg)
     
