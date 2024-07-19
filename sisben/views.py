@@ -58,7 +58,9 @@ def validate_sisben(request: Request):
         municipio = data['persona']['municipio']
         departamento = data['persona']['departamento']
 
-        if municipio.lower() == 'Norte de Santander'.lower() and departamento.lower() == 'Villa del Rosario'.lower():
+        print(municipio, departamento)
+
+        if municipio.lower() == 'Villa del Rosario'.lower() and departamento.lower() == 'Norte de Santander'.lower():
             return Response('Si', status=200, content_type='text/plain')
 
         write_log(str(data), 200, request.build_absolute_uri())
