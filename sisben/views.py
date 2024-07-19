@@ -44,6 +44,32 @@ def sisben(request: Request):
     except Exception as e:
         write_log(str(e), 500, request.build_absolute_uri())
         return Response(str(e), status=200, content_type='text/plain')
+    
+
+@api_view(['GET', 'POST'])
+def validate_sisben(request: Request):
+    docType = request.query_params.get('docType')
+    numDoc = request.query_params.get('numDoc')
+    try:
+        validateParams(docType, numDoc, session)
+
+        data = session.get_sisben(docType, numDoc)
+
+        municipio = data['persona']['municipio']
+        departamento = data['persona']['departamento']
+
+        if municipio.lower() == 'Norte de Santander'.lower() and departamento.lower() == 'Villa del Rosario'.lower():
+            return Response('Si', status=200, content_type='text/plain')
+
+        write_log(str(data), 200, request.build_absolute_uri())
+        return Response(f'Hemos detectado que tiene su sisben registrado en {departamento}-{municipio}. Lo invitamos a que se acerque a la oficina del sisben del lugar indicado.', status=200, content_type='text/plain')
+    except ValueError as ve:
+        write_log(str(ve), 400, request.build_absolute_uri())
+        return Response(str(ve), status=200, content_type='text/plain')
+    except Exception as e:
+        write_log(str(e), 500, request.build_absolute_uri())
+        return Response(str(e), status=200, content_type='text/plain')
+
 
 @api_view(['GET', 'POST'])
 def get_message(request: Request):
