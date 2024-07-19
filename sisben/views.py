@@ -22,7 +22,7 @@ def sisben(request: Request):
 
         if data['status_code'] != 200:
             write_log(str(data), data['status_code'], request.build_absolute_uri())
-            return Response(data, status=200, content_type='text/plain')
+            return Response(data, status=200, content_type='application/json')
         
         context = {
             'persona': data['persona'],
@@ -32,18 +32,19 @@ def sisben(request: Request):
         # Genera el PDF de la consulta del Sisben
         download_url = generar_pdf(request, context, numDoc)
 
-        if settings.DEBUG:
-            write_log(f'http://localhost:8000{download_url}', 200, request.build_absolute_uri())
-            return Response(f'http://localhost:8000{download_url}', status=200, content_type='text/plain')
+        #Obtiene la url de acceso al pdf. 
+        data['download_url'] = f'http://localhost:8000{download_url}' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}{download_url}'
 
-        write_log(f'{os.environ.get('IP_SERVER')}{download_url}', 200, request.build_absolute_uri())
-        return Response(f'{os.environ.get('IP_SERVER')}{download_url}', status=200, content_type='text/plain')
+        # escribe el log de lo que se retorna
+        write_log( {'mensaje': f'Su pdf se encuentra en 👉 {data['download_url']}' }, 200, request.build_absolute_uri())
+
+        return Response({ 'mensaje': f'Su pdf se encuentra en 👉 {data['download_url']}' } , status=200, content_type='application/json')
     except ValueError as ve:
-        write_log(str(ve), 400, request.build_absolute_uri())
-        return Response(str(ve), status=200, content_type='text/plain')
+        write_log({'mensaje': str(ve)}, 400, request.build_absolute_uri())
+        return Response({'mensaje': str(ve)}, status=200, content_type='application/json')
     except Exception as e:
-        write_log(str(e), 500, request.build_absolute_uri())
-        return Response(str(e), status=200, content_type='text/plain')
+        write_log( { 'mensaje': str(e) }, 500, request.build_absolute_uri())
+        return Response( { 'mensaje': str(e) }, status=200, content_type='application/json')
     
 
 @api_view(['GET', 'POST'])
@@ -58,22 +59,26 @@ def validate_sisben(request: Request):
         municipio = data['persona']['municipio']
         departamento = data['persona']['departamento']
 
-        print(municipio, departamento)
-
         if municipio.lower() == 'Villa del Rosario'.lower() and departamento.lower() == 'Norte de Santander'.lower():
-            return Response('Si', status=200, content_type='text/plain')
+            write_log({'mensaje': 'existe'}, 200, request.build_absolute_uri())
+            return Response({'mensaje': f'Hemos comprobado que cuenta con su sisben en {departamento} - {municipio}'}, status=200, content_type='application/json')
 
-        write_log(str(data), 200, request.build_absolute_uri())
-        return Response(f'Hemos detectado que tiene su sisben registrado en {departamento}-{municipio}. Lo invitamos a que se acerque a la oficina del sisben del lugar indicado.', status=200, content_type='text/plain')
+        write_log({
+            'mensaje': f'Hemos detectado que tiene su sisben registrado en {departamento}-{municipio}. Lo invitamos a que se acerque a la oficina del sisben del lugar indicado para realizar su solicitud.'
+        }, 200, request.build_absolute_uri())
+        
+        return Response({
+            'mensaje': f'Hemos detectado que tiene su sisben registrado en {departamento}-{municipio}. Lo invitamos a que se acerque a la oficina del sisben del lugar indicado para realizar su solicitud.'
+        }, status=200, content_type='application/json')
     except ValueError as ve:
-        write_log(str(ve), 400, request.build_absolute_uri())
-        return Response(str(ve), status=200, content_type='text/plain')
+        write_log({'mensaje': str(ve) }, 400, request.build_absolute_uri())
+        return Response({'mensaje': str(ve) }, status=200, content_type='application/json')
     except Exception as e:
-        write_log(str(e), 500, request.build_absolute_uri())
-        return Response(str(e), status=200, content_type='text/plain')
+        write_log({'mensaje': str(e)}, 500, request.build_absolute_uri())
+        return Response({'mensaje': str(e)}, status=200, content_type='application/json')
 
 
 @api_view(['GET', 'POST'])
 def get_message(request: Request):
     write_log('Hola mundo!!!', 200, request.build_absolute_uri())
-    return Response('Hola mundo!!!', status=200, content_type='text/plain')
+    return Response({'mensaje': 'Hola mundo'}, status=200, content_type='application/json')
