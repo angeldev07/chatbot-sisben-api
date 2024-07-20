@@ -74,4 +74,4 @@ def generar_pdf(request, context, numDoc):
     file_path = os.path.join(settings.MEDIA_ROOT, f'{numDoc}.pdf')
     with open(file_path, 'wb') as f:
         f.write(pdf)
-    return settings.MEDIA_URL + f'{numDoc}.pdf'
+    return pdf, settings.MEDIA_URL + f'{numDoc}.pdf'

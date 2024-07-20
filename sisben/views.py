@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -30,7 +31,7 @@ def sisben(request: Request):
         }
 
         # Genera el PDF de la consulta del Sisben
-        download_url = generar_pdf(request, context, numDoc)
+        download_url = generar_pdf(request, context, numDoc)[1]
 
         #Obtiene la url de acceso al pdf. 
         data['download_url'] = f'http://localhost:8000{download_url}' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}{download_url}'
@@ -77,6 +78,40 @@ def validate_sisben(request: Request):
         write_log({'mensaje': str(e)}, 500, request.build_absolute_uri())
         return Response({'mensaje': str(e)}, status=200, content_type='application/json')
 
+
+@api_view(['GET', 'POST'])
+def sisben_pdf(request: Request):
+    # Obtiene el tipo de documento y el número de documento de la consulta
+    docType = request.query_params.get('docType')
+    numDoc = request.query_params.get('numDoc')
+    try:
+        # Valida los parámetros de entrada
+        validateParams(docType, numDoc, session)
+
+        data = session.get_sisben(docType, numDoc)
+
+        if data['status_code'] != 200:
+            write_log(str(data), data['status_code'], request.build_absolute_uri())
+            return Response(data, status=200, content_type='application/json')
+        
+        context = {
+            'persona': data['persona'],
+            'sisben': data['sisben'],
+        }
+
+        # Genera el PDF de la consulta del Sisben
+        pdf = generar_pdf(request, context, numDoc)[0]
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{numDoc}.pdf"'
+        return response
+    except ValueError as ve:
+        write_log({'mensaje': str(ve)}, 400, request.build_absolute_uri())
+        return Response({'mensaje': str(ve)}, status=200, content_type='application/json')
+    except Exception as e:
+        write_log( { 'mensaje': str(e) }, 500, request.build_absolute_uri())
+        return Response( { 'mensaje': str(e) }, status=200, content_type='application/json')
+    
 
 @api_view(['GET', 'POST'])
 def get_message(request: Request):
