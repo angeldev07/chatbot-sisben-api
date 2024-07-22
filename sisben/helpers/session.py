@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from sisben.helpers.logs import write_log
 
 class SisbenSession():
 
@@ -49,8 +50,15 @@ class SisbenSession():
         try:
 
             if self.verify_token is None:
-                self.reset_session()
-                raise ValueError(self.critical_error_mssg)
+                # intento maximo de 5 veces para obtener una conexión exitosa y obtener el token
+                for _ in range(5):
+                    self.reset_session()
+                    print('Intento de conexión')
+                    if self.verify_token is not None:
+                        break
+                else:
+                    write_log('Se intento la conexion 5 veces y no se obtuvo respuesta exitosa', 500, '')
+                    raise ValueError(self.critical_error_mssg)
 
             data = {
                 '__RequestVerificationToken': self.verify_token,
