@@ -6,7 +6,6 @@ from sisben.helpers.session import SisbenSession
 from sisben.utils.get_sisben_fns import validateParams, generar_pdf
 import os 
 
-session = SisbenSession()
 
 @api_view(['GET', 'POST'])
 def sisben(request: Request):
@@ -15,8 +14,10 @@ def sisben(request: Request):
         docType = request.query_params.get('docType')
         numDoc = request.query_params.get('numDoc')
 
+        session = SisbenSession()
+
         # Valida los parámetros de entrada
-        validateParams(docType, numDoc, session)
+        validateParams(docType, numDoc, session.get_types_document())
 
         data = session.get_sisben(docType, numDoc)
         
@@ -30,11 +31,13 @@ def sisben(request: Request):
 
         #Obtiene la url de acceso al pdf. 
         data['download_url'] = f'http://localhost:8000{download_url}' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}{download_url}'
-        session.reset_session()
+        session.close_session()
         return Response({ 'mensaje': f'{data['download_url']}' } , status=200, content_type='application/json')
     except ValueError as ve:
+        session.close_session()
         return Response({'mensaje': str(ve)}, status=200, content_type='application/json')
     except Exception as e:
+        session.close_session()
         return Response( { 'mensaje': str(e) }, status=200, content_type='application/json')
     
 
@@ -44,7 +47,9 @@ def validate_sisben(request: Request):
         docType = request.query_params.get('docType')
         numDoc = request.query_params.get('numDoc')
 
-        validateParams(docType, numDoc, session)
+        session = SisbenSession()
+
+        validateParams(docType, numDoc, session.get_types_document())
 
         data = session.get_sisben(docType, numDoc)
 
@@ -53,15 +58,17 @@ def validate_sisben(request: Request):
 
         if municipio.lower() == 'Villa del Rosario'.lower() and departamento.lower() == 'Norte de Santander'.lower():
             session.reset_session()
-            return Response({'mensaje': f'Hemos comprobado que cuenta con su sisben en {departamento} - {municipio}'}, status=200, content_type='application/json')
+            return Response({'mensaje': f'Existe'}, status=200, content_type='application/json')
         
         session.reset_session()
         return Response({
-            'mensaje': f'Hemos detectado que tiene su sisben registrado en {departamento}-{municipio}. Lo invitamos a que se acerque a la oficina del sisben del lugar indicado para realizar su solicitud.'
+            'mensaje': f'Existe, pero no en Villa del Rosario'
         }, status=200, content_type='application/json')
     except ValueError as ve:
-        return Response({'mensaje': str(ve) }, status=200, content_type='application/json')
+        session.close_session()
+        return Response({'mensaje': 'No existe en el sisben.' }, status=200, content_type='application/json')
     except Exception as e:
+        session.close_session()
         return Response({'mensaje': str(e)}, status=200, content_type='application/json')
 
 

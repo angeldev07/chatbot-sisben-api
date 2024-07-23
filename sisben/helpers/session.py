@@ -5,16 +5,27 @@ from sisben.helpers.logs import write_log
 class SisbenSession():
 
     def __init__(self):
-        self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsulta'
-        self.critical_error_mssg = 'Lo sentimos, estamos teniendo problemas con la consulta del Sisben. Intentelo más tarde. Si el problema persiste, comuníquese con el administrador del servicio.'
-        self.session = requests.Session()
-        self.verify_token = self.get_token_from_request()
+        try:
+            self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsulta'
+            self.critical_error_mssg = 'Lo sentimos, la pagina del Sisben no responde en este momento. Por favor, intenta de nuevo mas tarde.'
+            self.session = requests.Session()
+            self.verify_token = self.get_token_from_request()
+        except Exception as e:
+            write_log(f'Error al iniciar la sesión: {str(e)}', 500, '')
+            self.verify_token = None
 
     def reset_session(self):
-        self.session = self.session.close() # Cerrar la sesión actual
-        # Crear una nueva sesión y obtenemos el token de esa nueva sesión
-        self.session = requests.Session()
-        self.verify_token = self.get_token_from_request()
+        try:
+            self.session.close() # Cerrar la sesión actual
+            # Crear una nueva sesión y obtenemos el token de esa nueva sesión
+            self.session = requests.Session()
+            self.verify_token = self.get_token_from_request()
+        except Exception as e:
+            write_log(f'Error al reiniciar la sesión en reset session: {str(e)}', 500, '')
+            self.verify_token = None
+    
+    def close_session(self):
+        self.session = self.session.close()
 
     def get_types_document(self):
         return {
@@ -29,7 +40,6 @@ class SisbenSession():
             '9': 'Permiso Por Protección Temporal'
         }
 
-
     def get_token_from_request(self):
         """Extrae el token de la página web para realizar la consulta del Sisben.
 
@@ -38,7 +48,11 @@ class SisbenSession():
         """
         try:
             response = self.session.get(self.initial_url)
-            response.raise_for_status()
+           
+            if response.status_code != 200:
+                write_log('Error al obtener el token en get_token_from_request', response.status_code, '')
+                return None
+
             # si no ocurre una excepción, se extrae el token
             soup = BeautifulSoup(response.content, 'html.parser')
             token = soup.find('input', {'name': '__RequestVerificationToken'})['value']
@@ -47,7 +61,7 @@ class SisbenSession():
             return None
         
     def make_request(self, docType, docNumber):
-        max_try = 3 # Número máximo de intentos para obtener una respuesta exitosa
+        max_try = 4 # Número máximo de intentos para obtener una respuesta exitosa
         
         for attempt in range(max_try):
             try:
@@ -58,7 +72,7 @@ class SisbenSession():
                         if self.verify_token is not None:
                             break
                     else:
-                        write_log('Se intento la conexion 5 veces y no se obtuvo respuesta exitosa', 500, '')
+                        write_log('Se intento la conexion 5 veces y no se obtuvo respuesta exitosa en  make_request', 500, '')
                         raise ValueError(self.critical_error_mssg)
 
                 data = {
@@ -72,10 +86,10 @@ class SisbenSession():
                 if response.status_code == 200:
                     return response
                 else:
-                    write_log(f'Intento {attempt + 1} de conexion fallido', response.status_code, '')
+                    write_log(f'Intento {attempt + 1} de conexion fallido en make_request', response.status_code, '')
         
             except Exception as e:
-                write_log(f"Error en el intento {attempt + 1}: {str(e)}", 500, '')
+                write_log(f"Error en el intento {attempt + 1}: {str(e)} en make_request", 500, '')
             
         raise ValueError(self.critical_error_mssg)
     

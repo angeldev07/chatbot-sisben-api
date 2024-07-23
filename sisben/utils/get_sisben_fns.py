@@ -17,7 +17,7 @@ def validateDoc(numDoc):
     pattern = re.compile(r'^\d{6,10}$')
     return pattern.match(str(numDoc)) is not None
 
-def validateParams(docType, numDoc, session):
+def validateParams(docType, numDoc, typesDocs):
     """
         Valida los parámetros de entrada para la vista sisben.
 
@@ -37,7 +37,7 @@ def validateParams(docType, numDoc, session):
         raise ValueError('Lo sentimos, el número de documento no es válido')
     if numDoc is None:
         raise ValueError('Lo sentimos, el número de documento es requerido')
-    if docType not in session.get_types_document().keys():
+    if docType not in typesDocs.keys():
         raise ValueError('Lo sentimos, el tipo de documento no es válido')
 
 
