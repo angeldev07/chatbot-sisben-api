@@ -47,34 +47,37 @@ class SisbenSession():
             return None
         
     def make_request(self, docType, docNumber):
-        try:
+        max_try = 3 # Número máximo de intentos para obtener una respuesta exitosa
+        
+        for attempt in range(max_try):
+            try:
+                if self.verify_token is None:
+                    # intento maximo de 5 veces para obtener una conexión exitosa y obtener el token
+                    for _ in range(2):
+                        self.reset_session()
+                        if self.verify_token is not None:
+                            break
+                    else:
+                        write_log('Se intento la conexion 5 veces y no se obtuvo respuesta exitosa', 500, '')
+                        raise ValueError(self.critical_error_mssg)
 
-            if self.verify_token is None:
-                # intento maximo de 5 veces para obtener una conexión exitosa y obtener el token
-                for _ in range(5):
-                    self.reset_session()
-                    print('Intento de conexión')
-                    if self.verify_token is not None:
-                        break
+                data = {
+                    '__RequestVerificationToken': self.verify_token,
+                    'TipoID': docType,
+                    'documento': docNumber,
+                }
+
+                response = self.session.post(self.initial_url, data=data, cookies=self.session.cookies)
+
+                if response.status_code == 200:
+                    return response
                 else:
-                    write_log('Se intento la conexion 5 veces y no se obtuvo respuesta exitosa', 500, '')
-                    raise ValueError(self.critical_error_mssg)
-
-            data = {
-                '__RequestVerificationToken': self.verify_token,
-                'TipoID': docType,
-                'documento': docNumber,
-            }
-            response = self.session.post(self.initial_url, data=data, cookies=self.session.cookies)
-
-            response.raise_for_status()
-
-            if response.status_code != 200:
-                raise ValueError(self.critical_error_mssg)
+                    write_log(f'Intento {attempt + 1} de conexion fallido', response.status_code, '')
+        
+            except Exception as e:
+                write_log(f"Error en el intento {attempt + 1}: {str(e)}", 500, '')
             
-            return response
-        except Exception as e:
-            raise ValueError(self.critical_error_mssg)
+        raise ValueError(self.critical_error_mssg)
     
     def get_sisben(self, docType, docNumber):
         try:

@@ -30,8 +30,8 @@ def sisben(request: Request):
 
         #Obtiene la url de acceso al pdf. 
         data['download_url'] = f'http://localhost:8000{download_url}' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}{download_url}'
-
-        return Response({ 'mensaje': f'👉 {data['download_url']}' } , status=200, content_type='application/json')
+        session.reset_session()
+        return Response({ 'mensaje': f'{data['download_url']}' } , status=200, content_type='application/json')
     except ValueError as ve:
         return Response({'mensaje': str(ve)}, status=200, content_type='application/json')
     except Exception as e:
@@ -52,8 +52,10 @@ def validate_sisben(request: Request):
         departamento = data['persona']['departamento']
 
         if municipio.lower() == 'Villa del Rosario'.lower() and departamento.lower() == 'Norte de Santander'.lower():
+            session.reset_session()
             return Response({'mensaje': f'Hemos comprobado que cuenta con su sisben en {departamento} - {municipio}'}, status=200, content_type='application/json')
-
+        
+        session.reset_session()
         return Response({
             'mensaje': f'Hemos detectado que tiene su sisben registrado en {departamento}-{municipio}. Lo invitamos a que se acerque a la oficina del sisben del lugar indicado para realizar su solicitud.'
         }, status=200, content_type='application/json')
