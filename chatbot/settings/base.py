@@ -18,6 +18,7 @@ BASE_APPS = [
 # aplicaciones locales, es decir, aplicaciones creadas por nosotros
 LOCAL_APPS = [
     'sisben',
+    'hacienda'
 ]
 
 # aplicaciones de terceros, es decir, aplicaciones instaladas por pip
