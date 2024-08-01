@@ -13,15 +13,17 @@ services:
     depends_on:
       - nginx
 
-
   nginx:
     build:
       context: ./nginx
     container_name: nginx
     volumes:
       - media_volume:/app/media
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/lib/letsencrypt:/var/lib/letsencrypt:ro
     ports:
       - "80:80"
+      - "443:443"
 
 volumes:
   media_volume:
