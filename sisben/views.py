@@ -24,6 +24,7 @@ def sisben(request: Request):
         context = {
             'persona': data['persona'],
             'sisben': data['sisben'],
+            'contacto': data['contacto']
         }
 
         # Genera el PDF de la consulta del Sisben

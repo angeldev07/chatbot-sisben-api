@@ -2,123 +2,284 @@
 {% load static %}
 <html lang="es">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <title>Informe Sisben - Alcaldía de Villa del Rosario</title>
     <style>
-        *{
-            box-sizing: border-box;
+        @page {
+            size: A4;
             margin: 0;
-            padding: 0;
         }
         body {
             font-family: Arial, sans-serif;
             color: #333;
             margin: 0;
+            padding: 0;
         }
         .container {
-            margin: auto;
-            background: #fff;
-            padding: 20px;
+            padding: 20px 40px;
         }
-        h1 {
-            text-align: center;
+        .header {
+            border-bottom: 2px solid #4CAF50;
+            padding: 10px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-logo {
+            display: flex;
+            align-items: center;
+        }
+        .header-logo img {
+            width: 80px;
+            height: auto;
+            margin-right: 10px;
+        }
+        .header-title {
+            text-align: left;
+        }
+        .header-title h1 {
+            margin: 0;
+            margin-left: 1rem;
+            font-size: 24px;
             color: #4CAF50;
         }
+        .header-contact {
+            text-align: right;
+            font-size: 14px;
+        }
+        .header-contact p {
+            margin: 5px 0;
+        }
+
         h2 {
-            text-align: center;
             color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
             margin-bottom: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 30px;
         }
         th, td {
             padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            border: 1px solid #ddd;
         }
         th {
-            background-color: #f2f2f2;
-            color: #333;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            text-align: center;
         }
         .label {
             font-weight: bold;
+            width: 40%;
         }
-        .img{
-            display: block;
+        .alerta {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
-        .img-container {
+        .footer {
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .footer img {
+            width: 100px;
+            height: auto;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+        .item {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .sisben-info {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .sisben-info h1 {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        .category {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .tag {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        .tag-valid {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tag-review {
+            background-color: #FFC107;
+            color: #333;
+        }
+
+        .contacto-info {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+        .contacto-info h3 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .contacto-contenido {
+            display: inline-block;
+            text-align: left;
+        }
+
+        .contacto-item {
+            margin-bottom: 10px;
+        }
+
+        .contacto-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 180px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .contacto-value {
+            display: inline-block;
         }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <div class="img-container">
-            <div>
-                <img src="{% static 'img/sisben.png' %}" width="200px"  class="img">
-            </div>
-            <div>
-                <img src="{% static 'img/alcaldia_logo.jpg' %}" width="80px">
+    <div class="header">
+        <div class="header-logo">
+            <img src="{% static 'img/logoalcaldiavilladelrosario.png' %}" alt="Logo Alcaldía">
+            <div class="header-title">
+                <h1>Alcaldía de Villa del Rosario</h1>
             </div>
         </div>
-        <hr>
-        <br>
-        <h1>Información del Sisben</h1>
-        <h2>Datos del Sisben</h2>
-        <table>
-            <tr>
-                <td class="label">Fecha de Consulta:</td>
-                <td>{{ sisben.fecha_consulta }}</td>
-            </tr>
-            <tr>
-                <td class="label">Ficha:</td>
-                <td>{{ sisben.ficha }}</td>
-            </tr>
-            <tr>
-                <td class="label">Puntaje:</td>
-                <td>{{ sisben.puntaje }}</td>
-            </tr>
-            <tr>
-                <td class="label">Nivel de Pobreza:</td>
-                <td>{{ sisben.nivel_pobreza }}</td>
-            </tr>
-        </table>
-
-        <h2 style="margin: .5rem 0;">Datos de la Persona</h2>
-        <table>
-            <tr>
-                <td class="label">Nombres:</td>
-                <td>{{ persona.nombres }}</td>
-            </tr>
-            <tr>
-                <td class="label">Apellidos:</td>
-                <td>{{ persona.apellidos }}</td>
-            </tr>
-            <tr>
-                <td class="label">Tipo de Documento:</td>
-                <td>{{ persona.tipo_documento }}</td>
-            </tr>
-            <tr>
-                <td class="label">Número de Documento:</td>
-                <td>{{ persona.numero_documento }}</td>
-            </tr>
-            <tr>
-                <td class="label">Municipio:</td>
-                <td>{{ persona.municipio }}</td>
-            </tr>
-            <tr>
-                <td class="label">Departamento:</td>
-                <td>{{ persona.departamento }}</td>
-            </tr>
-        </table>
+        <div class="header-contact">
+            <p><strong>Dirección:</strong> Carrera 7ª N. 4-71 Barrio Centro</p>
+            <p><strong>Teléfono:</strong> (60) (7) 5955026</p>
+            <p><strong>Email:</strong> contactenos@villadelrosario-nortedesantander.gov.co</p>
+        </div>
     </div>
-    <div style="display: flex; justify-content: center; gap: 1rem;">
-        <span>Desarrollado por</span>
-        <img src="{% static 'img/emsitel_logo.png' %}" width="80px" style="margin-left: 1rem;" >
+
+    <div class="container">
+        <div class="content">
+            <div class="main-info">
+                <div style="margin-bottom: 1rem;">
+                    <div class="item">
+                        <span>Registro</span>
+                        <strong>
+                            {% if sisben.registro.valido %}
+                                <span class="tag tag-valid">Válido</span>
+                            {% else %}
+                                <span class="tag tag-review">Requiere revisión</span>
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="item">
+                        <span>Ficha</span>
+                        <strong>
+                            {{ sisben.ficha }}
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="sisben-info">
+                    <h1>{{ sisben.puntaje }}</h1>
+                    <div class="category">
+                        {{ sisben.nivel_pobreza }}
+                    </div>  
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">Datos de la Persona</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td class="label">Nombres:</td>
+                        <td><strong>{{ persona.nombres }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Apellidos:</td>
+                        <td><strong>{{ persona.apellidos }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label">Tipo de Documento:</td>
+                        <td>{{ persona.tipo_documento }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Número de Documento:</td>
+                        <td>{{ persona.numero_documento }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Municipio:</td>
+                        <td>{{ persona.municipio }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Departamento:</td>
+                        <td>{{ persona.departamento }}</td>
+                    </tr>
+                </table>
+            </div>
+        
+            {% if not sisben.registro.valido %}
+                <div class="alerta">
+                    <strong>Nota:</strong> {{ sisben.registro.text }}
+                </div>
+            {% endif %}
+
+            <div class="contacto-info">
+                <h3>Contacto Oficina SISBEN</h3>
+                <div class="contacto-contenido">
+                    <div class="contacto-item">
+                        <span class="contacto-label">Administrador:</span>
+                        <span class="contacto-value">{{ contacto.nombre_administrador }}</span>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="contacto-label">Dirección:</span>
+                        <span class="contacto-value">{{ contacto.direccion }}</span>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="contacto-label">Teléfono:</span>
+                        <span class="contacto-value">{{ contacto.telefono }}</span>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="contacto-label">Correo Electrónico:</span>
+                        <span class="contacto-value">{{ contacto.correo_electronico }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <img src="{% static 'img/sisben.png' %}" alt="Logo Sisben">
+        <span style="color: #000;">Desarrollado por</span>
+        <img src="{% static 'img/emsitel_logo.png' %}" alt="Logo Emsitel">
+        <img src="{% static 'img/chatbot.png' %}" alt="Logo Emsitel" style="position: absolute; bottom: 20px; right: 5px;">
     </div>
 </body>
 </html>
