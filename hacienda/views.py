@@ -18,21 +18,22 @@ def getprediales(request: Request):
         numDoc = request.query_params.get('documento')
 
         if numDoc is None:
-            return Response({'error': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'mensaje': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Elimina cualquier registro que haya tenido antes el usuario
         predialobj = PredialSearch.objects.filter(cedula=numDoc).first()
         if predialobj is not None:
+            # se valida si ha pasado mas de 1h desde la ultima consulta
             lasttime = (timezone.now() - timedelta(hours=5)) - predialobj.primera_consulta
             if lasttime > timedelta(hours=1):
                 predialobj.delete()
             else:
                 return Response({'mensaje': predialobj.mensaje}, status=status.HTTP_200_OK)
 
-        
         prediales = tns.getprediales(numDoc)
         finalmessage = f'He encontrado estos predios relacionados al N° documento: *{numDoc}*. Por favor, envíame el número del predio que quieres liquidar:\n {formatmessage(prediales=prediales)}'
 
+        # se guarda momentaneamente la consulta en la base de datos
         PredialSearch.objects.create(
             cedula=numDoc,
             prediales=formatpredial(prediales=prediales),
@@ -42,6 +43,8 @@ def getprediales(request: Request):
         ).save()
 
         return Response({'mensaje': finalmessage}, status=status.HTTP_200_OK)
+    except ValueError as ve:
+        return Response({'mensaje': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'mensaje': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
@@ -53,8 +56,9 @@ def getpredialpdf(request: Request):
         predialOption = int(request.query_params.get('opcion'))
 
         if numDoc is None:
-            return Response({'error': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'mensaje': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
         
+        # Comprobamos que el usuario ya haya consultado los prediales anteriormente 
         predialObj = PredialSearch.objects.filter(cedula=numDoc).first()
 
         if predialObj is None:
@@ -62,30 +66,38 @@ def getpredialpdf(request: Request):
         
         prediales = predialObj.prediales.split(' ')
 
+        # se valida que el usuario ingrese una opcion valida dependiendo de la cantidad de prediales que tenga. 
         if not (1 <= predialOption <= len(prediales)):
             return Response({'mensaje': 'La opcion no es correcta. Ingresa una de las opciones indicadas anteriormente.'}, status=status.HTTP_400_BAD_REQUEST)
         
+        # se obtiene el pdf y el link de pago
         response = tns.getpaymethod(prediales[predialOption-1])
-        path = os.path.join(settings.MEDIA_ROOT, f'{numDoc}-{prediales[predialOption-1]}.pdf')
 
-        convertPdf = convertBase64ToPDF(response[0], path)
+        filename = f'predial-{prediales[predialOption-1]}.pdf'
+
+        path = os.path.join(settings.MEDIA_ROOT, f'{filename}')
+
+        convertBase64ToPDF(response[0], path)
 
         predialObj.estado = ESTADOS['CONSULTA_PREDIAL_OBJETIVO']
         predialObj.link_cobro = response[1]
+        predialObj.nombre_archivo = filename
         predialObj.save()
 
-        accessLink = f'http://localhost:8000/media/{numDoc}-{prediales[predialOption-1]}.pdf' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}/media/{numDoc}-{prediales[predialOption-1]}.pdf'
+        accessLink = f'http://localhost:8000/media/{filename}' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}/media/{filename}'
 
         return Response({'mensaje' : accessLink}, status=status.HTTP_200_OK)
+    except ValueError as ve:
+        return Response({'mensaje': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'mensaje': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET', 'POST'])
 def getpaymethod(request: Request):
     try:
         numDoc = request.query_params.get('documento')
         if numDoc is None:
-            return Response({'error': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'mensaje': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
         
         predialObj = PredialSearch.objects.filter(cedula=numDoc).first()
 
@@ -94,9 +106,74 @@ def getpaymethod(request: Request):
         
         link_cobro = predialObj.link_cobro
 
+        # comprobar si el archivo existe
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, predialObj.nombre_archivo)):
+            os.remove(os.path.join(settings.MEDIA_ROOT, predialObj.nombre_archivo))
+
         predialObj.delete()
         
         return Response({'mensaje': link_cobro}, status=status.HTTP_200_OK)
+    except ValueError as ve:
+        return Response({'mensaje': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'mensaje': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+# ===========================================  Metodos directos =======================================================================================
+
+@api_view(['GET', 'POST'])
+def getpredialdirect(request: Request):
+    try:
+        
+        numDoc = request.query_params.get('documento')
+
+        if numDoc is None:
+            return Response({'mensaje': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        prediales = tns.getprediales(numDoc)
+        finalmessage = f'He encontrado estos predios relacionados al N° documento: *{numDoc}*. Por favor, envíame el número del predio que quieres liquidar:\n {formatmessage(prediales=prediales)}'
+
+        return Response({'mensaje': finalmessage}, status=status.HTTP_200_OK)
+
 
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'mensaje': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET', 'POST'])
+def getpredialpdfdirect(request: Request):
+    try:
+
+        predial = request.query_params.get('predial')
+
+        if predial is None:
+            return Response({'mensaje': 'El número de predial es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        response = tns.getpaymethod(predial)
+
+        path = os.path.join(settings.MEDIA_ROOT, f'predial-{predial}.pdf')
+
+        convertBase64ToPDF(response[0], path)
+        accessLink = f'http://localhost:8000/media/predial-{predial}.pdf' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}/media/predial-{predial}.pdf'
+
+        return Response({'mensaje' : accessLink}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'mensaje': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET', 'POST'])
+def getpaymethoddirect(request: Request):
+    try:
+        predial = request.query_params.get('predial')
+        if predial is None:
+            return Response({'mensaje': 'El número de predial es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        response = tns.getpaymethod(predial)
+
+        # comprobar si el archivo existe
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, f'predial-{predial}.pdf')):
+            os.remove(os.path.join(settings.MEDIA_ROOT, f'predial-{predial}.pdf'))
+
+
+        return Response({'mensaje': response[1]}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'mensaje': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

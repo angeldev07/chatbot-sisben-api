@@ -15,6 +15,7 @@ class PredialSearch(models.Model):
     primera_consulta = models.DateTimeField( blank=True, null=True)
     estado = models.CharField(max_length=254, blank=True, null=True)
     mensaje = models.TextField(blank=True, null=True)
+    nombre_archivo = models.CharField(max_length=254, blank=True, null=True)
 
     class Meta:
         db_table = 'prediales'
