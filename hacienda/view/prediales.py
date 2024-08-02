@@ -65,7 +65,8 @@ def getpredialpdf(request: Request):
         if predialOption is None or not predialOption.isnumeric():
             return Response({'mensaje': 'La opcion no es correcta. Ingresa una de las opciones indicadas anteriormente.'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+        predialOption = int(predialOption)
+        
         # se valida que el usuario ingrese una opcion valida dependiendo de la cantidad de prediales que tenga. 
         if not (1 <= int(predialOption) <= len(prediales)):
             return Response({'mensaje': 'La opcion no es correcta. Ingresa una de las opciones indicadas anteriormente.'}, status=status.HTTP_400_BAD_REQUEST)

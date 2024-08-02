@@ -9,10 +9,16 @@ class TNSRequest:
         """
             Inicializa la instancia de TNSRequest con la URL base y los endpoints disponibles.
         """
-        self.url = "https://api-gov.tns.co/api/Predial/"
+        self.url = "https://api-gov.tns.co/api/"
         self.endpoints = {
-            'prediales': 'ListarPrediosDocumento',
-            'reporte': 'GenRecTemporalFicha',
+            'prediales': {
+                'listar': 'Predial/ListarPrediosDocumento',
+                'pdf': 'Predial/GenRecTemporalFicha',
+            },
+            'ica': {
+                'establecimientos': 'Local/ListarEstablecimientosDocumento',
+                'historial': 'Local/GetAllDeclaracionesPlaca',
+            }
         }
         self.request = requests
 
@@ -51,7 +57,7 @@ class TNSRequest:
             request = f'empresa={envs['empresa']}&usuario={envs['usuario']}&password={envs['password']}&tnsapitoken={envs['tnsapitoken']}&documento={cc}'
 
             # make the request to tns 
-            response = self.request.get(f'{self.url}{self.endpoints["prediales"]}?{request}')
+            response = self.request.get(f'{self.url}{self.endpoints["prediales"]['listar']}?{request}')
 
             if response.status_code >= 400 and response.status_code <= 500:
                 error = response.json()
@@ -86,12 +92,77 @@ class TNSRequest:
             # estructura de la request
             request = f'empresa={envs['empresa']}&usuario={envs['usuario']}&password={envs['password']}&tnsapitoken={envs['tnsapitoken']}&ficha={ficha}'
 
-            response = self.request.post(f'{self.url}{self.endpoints["reporte"]}?{request}')
+            response = self.request.post(f'{self.url}{self.endpoints["prediales"]["pdf"]}?{request}')
 
             if response.status_code >= 400 and response.status_code <= 500:
                 raise ValueError('Estamos teniendo problemas con el servicio, por favor intente más tarde.')
 
             return response.json()
 
+        except Exception as e:
+            raise
+
+    def getlocalesbycc(self, cc):
+        """
+
+
+        Args:
+            cc (str): Número de la cédula.
+
+        Raises:
+            ValueError: No se encontro el establecimiento para el documento _documento_. 
+            ValueError: Estamos teniendo problemas con el servicio, por favor intente más tarde.
+
+        Returns:
+           dict: Respuesta de la API de TNS, los campos son:
+                  - OCODIGO: Código del establecimiento.
+                  - ONOMBRE: Nombre del establecimiento.
+                  - ODIRECCION: Dirección del establecimiento.
+        """
+        try:
+            envs = self.__env()
+            request = f'{self.endpoints['ica']['establecimientos']}?empresa={envs['empresa']}&usuario={envs['usuario']}&password={envs['password']}&tnsapitoken={envs['tnsapitoken']}&documento={cc}'
+            response = self.request.get(f'{self.url}{request}')
+
+            if response.status_code >= 400 and response.status_code <= 500:
+                error = response.json()
+
+                if 'No se encontro el establecimiento'.lower() in error['results'].lower():
+                    raise ValueError(error['results'])
+                
+                raise ValueError('Estamos teniendo problemas con el servicio, por favor intente más tarde.')
+
+            # si todo sale bien, retornamos la respuesta
+            return response.json()
+        except Exception as e:
+            raise
+    
+    def gethistorybyplaca(self, placa):
+        """Obtiene el historial de declaraciones de un establecimiento por placa.
+
+        Args:
+            placa (str): Placa de identificación del establecimiento.
+
+        Raises:
+            ValueError: No se encontraron declaraciones para la placa _placa_.
+            ValueError: Los datos proporcionados no son correctos.
+
+        Returns:
+            dict: Respuesta de la API de TNS, los campos son:
+        """
+        try:
+            envs = self.__env()
+            request = f'{self.endpoints['ica']['historial']}?empresa={envs['empresa']}&usuario={envs['usuario']}&password={envs['password']}&tnsapitoken={envs['tnsapitoken']}&placa={placa}'
+            response = self.request.get(f'{self.url}{request}')
+
+            if response.status_code >= 400 and response.status_code <= 500:
+                error = response.json()
+
+                if 'Ha ocurrido un error'.lower() in error['results'].lower():
+                    raise ValueError('Los datos proporcionados no son correctos.')
+                
+                raise ValueError('Los datos proporcionados no son correctos.')
+
+            return response.json()
         except Exception as e:
             raise
