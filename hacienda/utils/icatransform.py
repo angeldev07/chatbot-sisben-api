@@ -15,3 +15,9 @@ def getmessage(establecimientos: list) -> str:
     for establecimiento in establecimientos:
         message += f"*{establecimiento['OCODIGO']}* - {establecimiento['ONOMBRE']}                                                                                                                            \n" #no borrar los espacios exagerados, el \n es por si cuela xd
     return message
+
+def gethistorialmessage(historial: list) -> str:
+    message = ''
+    for history in historial:
+        message += f"*{history['OFECHA']}* - {history['OTOTALPAGO'].split('.')[0]}                                                                                                                            \n"#no borrar los espacios exagerados, el \n es por si cuela xd
+    return message

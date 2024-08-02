@@ -149,6 +149,11 @@ class TNSRequest:
 
         Returns:
             dict: Respuesta de la API de TNS, los campos son:
+                    - OTIPO: tipo de pago
+                    - OPERIODO: periodo de pago
+                    - OFECHA: fecha de pago
+                    - OTOTALPAGO: total pagado
+                    - OESTADO: estado en el momento (no lo sé)
         """
         try:
             envs = self.__env()
