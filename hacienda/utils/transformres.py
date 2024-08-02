@@ -3,7 +3,7 @@ import base64
 def formatmessage(prediales: list) -> str:
     message = ""
     for index, predial in enumerate(prediales):
-        message += f'{index+1}. {predial} \n'
+        message += f'{index+1}. {predial.split('-')[1]} \u000A'
     return message
 
 def formatpredial(prediales: list) -> list:

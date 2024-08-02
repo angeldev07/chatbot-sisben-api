@@ -31,7 +31,7 @@ def getprediales(request: Request):
                 return Response({'mensaje': predialobj.mensaje}, status=status.HTTP_200_OK)
 
         prediales = tns.getprediales(numDoc)
-        finalmessage = f'He encontrado estos predios relacionados al N° documento: *{numDoc}*. Por favor, envíame el número del predio que quieres liquidar:\n {formatmessage(prediales=prediales)}'
+        finalmessage = f'He encontrado estos predios relacionados al N° documento: *{numDoc}*.\u000A{formatmessage(prediales=prediales)}\u000A'
 
         # se guarda momentaneamente la consulta en la base de datos
         PredialSearch.objects.create(
@@ -105,12 +105,6 @@ def getpaymethod(request: Request):
             return Response({'mensaje': 'Parece ser que no haz consultado con anterioridad los prediales. Te invitamos a que lo hagas.'}, status=status.HTTP_400_BAD_REQUEST)
         
         link_cobro = predialObj.link_cobro
-
-        # comprobar si el archivo existe
-        if os.path.exists(os.path.join(settings.MEDIA_ROOT, predialObj.nombre_archivo)):
-            os.remove(os.path.join(settings.MEDIA_ROOT, predialObj.nombre_archivo))
-
-        predialObj.delete()
         
         return Response({'mensaje': link_cobro}, status=status.HTTP_200_OK)
     except ValueError as ve:
