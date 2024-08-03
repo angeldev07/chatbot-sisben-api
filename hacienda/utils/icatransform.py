@@ -24,5 +24,5 @@ def gethistorialmessage(historial: list) -> str:
     message = ''
     for history in historial:
         pagado_format = format_currency(float(history['OTOTALPAGO']), 'COP', locale='es_CO')
-        message += f'*Periodo*: {getMonth(int(history['OPERIODO']))} DY_SALTO*Fecha*: {history['OFECHA']} DY_SALTO*Pagado*: {pagado_format} DY_SALTO'
+        message += f'*Periodo*: {getMonth(int(history['OPERIODO']))} DY_SALTO*Fecha*: {history['OFECHA']} DY_SALTO*Pagado*: {pagado_format} DY_SALTO DY_SALTO'
     return message

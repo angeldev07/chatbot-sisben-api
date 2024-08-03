@@ -164,7 +164,7 @@ class TNSRequest:
                 error = response.json()
 
                 if 'Ha ocurrido un error'.lower() in error['results'].lower():
-                    raise ValueError('Los datos proporcionados no son correctos.')
+                    raise ValueError(f'No se encontraron declaraciones para la placa *{placa}*')
                 
                 raise ValueError('Los datos proporcionados no son correctos.')
 
