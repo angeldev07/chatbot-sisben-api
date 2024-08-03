@@ -1,3 +1,6 @@
+from shared.utils.getmonth import getMonth
+import locale
+
 def getmessage(establecimientos: list) -> str:
     """Obtiene el mensaje final para enviar al chatbot
 
@@ -12,12 +15,15 @@ def getmessage(establecimientos: list) -> str:
         si tiene mas de un establecimiento. 
     """
     message = ''
+    # establecimiento['ONOMBRE']
     for establecimiento in establecimientos:
-        message += f"*{establecimiento['OCODIGO']}* - {establecimiento['ONOMBRE']}                                                                                                                            \n" #no borrar los espacios exagerados, el \n es por si cuela xd
+        message += f"*Placa*: *{establecimiento['OCODIGO']}* DY_SALTO*Local*:{establecimiento['ONOMBRE']} DY_SALTO"
     return message
 
 def gethistorialmessage(historial: list) -> str:
     message = ''
+    locale.setlocale(locale.LC_ALL, 'es_CO.UTF-8')
     for history in historial:
-        message += f"*{history['OFECHA']}* - {history['OTOTALPAGO'].split('.')[0]}                                                                                                                            \n"#no borrar los espacios exagerados, el \n es por si cuela xd
+        pagado_format = locale.currency(float(history['OTOTALPAGO']), grouping=True)
+        message += f'*Periodo*: {getMonth(int(history['OPERIODO']))} DY_SALTO*Fecha*: {history['OFECHA']} DY_SALTO*Pagado*: {pagado_format} DY_SALTO'
     return message

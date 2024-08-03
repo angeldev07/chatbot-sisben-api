@@ -106,7 +106,7 @@ def getpaymethod(request: Request):
         if predialObj is None:
             return Response({'mensaje': 'Parece ser que no haz consultado con anterioridad los prediales. Te invitamos a que lo hagas.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        link_cobro = predialObj.link_cobro
+        link_cobro = f'👨‍💻 En el siguiente enlace podras realizar el pago del predial solicitado. DY_SALTO {predialObj.link_cobro}'
         
         return Response({'mensaje': link_cobro}, status=status.HTTP_200_OK)
     except ValueError as ve:
