@@ -63,7 +63,7 @@ class TNSRequest:
                 error = response.json()
 
                 if 'No se encontraron predios'.lower() in error['results'].lower():
-                    raise ValueError('*No se encontraron predios para el documento 1091352585.*')
+                    raise ValueError(f'No se encontraron predios para el documento {cc}.')
                 
                 raise ValueError('Estamos teniendo problemas con el servicio, por favor intente más tarde.')
             
