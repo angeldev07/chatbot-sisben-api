@@ -1,5 +1,5 @@
 from shared.utils.getmonth import getMonth
-import locale
+from babel.numbers import format_currency
 
 def getmessage(establecimientos: list) -> str:
     """Obtiene el mensaje final para enviar al chatbot
@@ -22,8 +22,7 @@ def getmessage(establecimientos: list) -> str:
 
 def gethistorialmessage(historial: list) -> str:
     message = ''
-    locale.setlocale(locale.LC_ALL, 'es_CO.UTF-8')
     for history in historial:
-        pagado_format = locale.currency(float(history['OTOTALPAGO']), grouping=True)
+        pagado_format = format_currency(float(history['OTOTALPAGO']), 'COP', locale='es_CO')
         message += f'*Periodo*: {getMonth(int(history['OPERIODO']))} DY_SALTO*Fecha*: {history['OFECHA']} DY_SALTO*Pagado*: {pagado_format} DY_SALTO'
     return message
