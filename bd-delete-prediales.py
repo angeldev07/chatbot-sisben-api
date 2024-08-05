@@ -9,6 +9,7 @@ cursor = conn.cursor()
 
 # Eliminación de registros de la tabla PredialSearch
 cursor.execute('DELETE FROM prediales')
+cursor.execute('DELETE FROM "prdiales-links-pagos" ')
 
 # Confirmación de la transacción
 conn.commit()
@@ -17,7 +18,7 @@ conn.commit()
 conn.close()
 
 # Respuesta
-print('Se han eliminado los registros de la tabla PredialSearch.')
+print('Se han eliminado todos los registros y pdf.')
 
 # Borrar todos los pdfs en la carpeta media
 for file in os.listdir('media'):

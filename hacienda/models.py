@@ -19,3 +19,11 @@ class PredialSearch(models.Model):
 
     class Meta:
         db_table = 'prediales'
+
+#This class is use to reduce the tns pay link.
+class PredialUrlShort(models.Model):
+    original_url = models.TextField(blank=True, null=True)
+    short_id = models.CharField(max_length=20, blank=True, null=True, unique=True)
+
+    class Meta:
+        db_table = 'prdiales-links-pagos'

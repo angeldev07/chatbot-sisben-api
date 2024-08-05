@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.shortcuts import redirect, get_object_or_404
 from django.conf import settings
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -6,7 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from hacienda.helpers.tnsrequest import TNSRequest
 from hacienda.utils.transformres import formatmessage, formatpredial, convertBase64ToPDF
-from hacienda.models import PredialSearch, ESTADOS
+from hacienda.utils.shorturl import shorturl
+from hacienda.models import PredialSearch, ESTADOS, PredialUrlShort
 from datetime import timedelta
 import os
 
@@ -42,7 +44,7 @@ def getprediales(request: Request):
     except ValueError as ve:
         return Response({'mensaje': str(ve)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'mensaje': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'mensaje': 'Ha ocurrido un error. Intenta de nuevo más tarde.'}, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET', 'POST'])
 def getpredialpdf(request: Request):
@@ -79,11 +81,19 @@ def getpredialpdf(request: Request):
         path = os.path.join(settings.MEDIA_ROOT, f'{filename}')
 
         convertBase64ToPDF(response[0], path)
+        shortUrl = shorturl(url=response[1])
 
         predialObj.estado = ESTADOS['CONSULTA_PREDIAL_OBJETIVO']
-        predialObj.link_cobro = response[1]
+        predialObj.link_cobro = shortUrl[1]
         predialObj.nombre_archivo = filename
         predialObj.save()
+
+        
+        # save the url shor link
+        PredialUrlShort.objects.create(
+            original_url = shortUrl[2],
+            short_id = shortUrl[0]
+        ).save()
 
         accessLink = f'http://localhost:8000/media/{filename}' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}/media/{filename}'
 
@@ -106,7 +116,7 @@ def getpaymethod(request: Request):
         if predialObj is None:
             return Response({'mensaje': 'Parece ser que no haz consultado con anterioridad los prediales. Te invitamos a que lo hagas.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        link_cobro = f'👨‍💻 En el siguiente enlace podras realizar el pago del predial solicitado. DY_SALTO {predialObj.link_cobro}'
+        link_cobro = f'{predialObj.link_cobro}'
         
         return Response({'mensaje': link_cobro}, status=status.HTTP_200_OK)
     except ValueError as ve:
@@ -114,62 +124,10 @@ def getpaymethod(request: Request):
     except Exception as e:
         return Response({'mensaje': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-
-# ================================================================================================  Metodos directos =======================================================================================
-
 @api_view(['GET', 'POST'])
-def getpredialdirect(request: Request):
+def redirectToOriginalLink(request: Request, short_id: str):
     try:
-        
-        numDoc = request.query_params.get('documento')
-
-        if numDoc is None:
-            return Response({'mensaje': 'El número de documento es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        prediales = tns.getprediales(numDoc)
-        finalmessage = f'He encontrado estos predios relacionados al N° documento: *{numDoc}*. Por favor, envíame el número del predio que quieres liquidar:\n {formatmessage(prediales=prediales)}'
-
-        return Response({'mensaje': finalmessage}, status=status.HTTP_200_OK)
-
-
+       urlObj = get_object_or_404(PredialUrlShort, short_id=short_id)
+       return redirect(urlObj.original_url)
     except Exception as e:
-        return Response({'mensaje': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-@api_view(['GET', 'POST'])
-def getpredialpdfdirect(request: Request):
-    try:
-
-        predial = request.query_params.get('predial')
-
-        if predial is None:
-            return Response({'mensaje': 'El número de predial es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        response = tns.getpaymethod(predial)
-
-        path = os.path.join(settings.MEDIA_ROOT, f'predial-{predial}.pdf')
-
-        convertBase64ToPDF(response[0], path)
-        accessLink = f'http://localhost:8000/media/predial-{predial}.pdf' if settings.DEBUG else f'{os.environ.get('IP_SERVER')}/media/predial-{predial}.pdf'
-
-        return Response({'mensaje' : accessLink}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({'mensaje': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-@api_view(['GET', 'POST'])
-def getpaymethoddirect(request: Request):
-    try:
-        predial = request.query_params.get('predial')
-        if predial is None:
-            return Response({'mensaje': 'El número de predial es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        response = tns.getpaymethod(predial)
-
-        # comprobar si el archivo existe
-        if os.path.exists(os.path.join(settings.MEDIA_ROOT, f'predial-{predial}.pdf')):
-            os.remove(os.path.join(settings.MEDIA_ROOT, f'predial-{predial}.pdf'))
-
-
-        return Response({'mensaje': response[1]}, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        return Response({'mensaje': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'mensaje': 'El link al que intenta acceder no se encuentra disponible.'}, status=status.HTTP_404_NOT_FOUND)
