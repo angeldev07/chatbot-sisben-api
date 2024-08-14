@@ -1,29 +1,29 @@
+# AVR -> alcaldia villa del rosario.
 version: '3.9'
 services:
-  web:
+  chatbotavr:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/app
       - media_volume:/app/media
     ports:
       - "8000:8000"
-    container_name: web
-    depends_on:
-      - nginx
+    container_name: apiChatbotAVR
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - IP_SERVER=${IP_SERVER}
+      - CODIGO_EMPRESA=${CODIGO_EMPRESA}
+      - USUARIO=${USUARIO}
+      - PASSWD=${PASSWD}
+      - TNSTOKEN=${TNSTOKEN}
+    networks:
+      - chatbotavr
 
-  nginx:
-    build:
-      context: ./nginx
-    container_name: nginx
-    volumes:
-      - media_volume:/app/media
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/lib/letsencrypt:/var/lib/letsencrypt:ro
-    ports:
-      - "80:80"
-      - "443:443"
+networks:
+  chatbotavr:
+    driver: bridge
+    external: true
 
 volumes:
   media_volume:

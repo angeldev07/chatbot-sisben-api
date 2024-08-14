@@ -25,10 +25,20 @@ LOCAL_APPS = [
 THIRD_PARTY_APPS = [
     'corsheaders',
     'rest_framework',
+    'drf_yasg',
 ]
 
 # se juntan las aplicaciones para formar la lista de aplicaciones instaladas
 INSTALLED_APPS = BASE_APPS + LOCAL_APPS + THIRD_PARTY_APPS
+
+# =============================================================================================================================== 
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,  # Desactiva el botón de Django Login
+    'SECURITY_DEFINITIONS': None,
+    'SHOW_REQUEST_HEADERS': False,  # Opcional: Oculta los encabezados de solicitud
+    'SHOW_CONFIGURATOR': False,
+}
 
 # =============================================================================================================================== 
 
