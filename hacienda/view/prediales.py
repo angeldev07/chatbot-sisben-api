@@ -218,12 +218,6 @@ def getpredialpdf(request: Request):
             type=openapi.TYPE_STRING
         ),
         openapi.Parameter(
-            'opcion', 
-            openapi.IN_QUERY, 
-            description="Número de la opción de predial que desea consultar", 
-            type=openapi.TYPE_STRING
-        ),
-        openapi.Parameter(
             'apiKey', 
             openapi.IN_QUERY, 
             description="Api key para autenticar la consulta", 
