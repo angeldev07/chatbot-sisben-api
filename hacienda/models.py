@@ -1,4 +1,5 @@
 from django.db import models
+import secrets
 
 ESTADOS = {
    'CONSULTA_PREDIAL_GENERAL': 'CONSULTA_PREDIAL_GENERAL',
@@ -27,3 +28,17 @@ class PredialUrlShort(models.Model):
 
     class Meta:
         db_table = 'prdiales-links-pagos'
+
+class APIKey(models.Model):
+    username = models.CharField(max_length=100, unique=True)
+    key = models.CharField(max_length=64, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = secrets.token_hex(32).upper()  # Genera una clave única de 64 caracteres
+        super().save(*args, **kwargs)
+    
+    class Meta:
+        db_table = 'usuarios_keys'
+
