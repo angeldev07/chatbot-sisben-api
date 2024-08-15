@@ -10,7 +10,7 @@ def formatpredial(prediales: list) -> list:
     predial_list_str = ''
     for predial in prediales:
         predial_list_str += f'{predial.split('-')[0]} '
-    return predial_list_str
+    return predial_list_str.strip()
 
 def convertBase64ToPDF(pdfBase64: str, path: str) -> str:
     # Decodificar la cadena Base64

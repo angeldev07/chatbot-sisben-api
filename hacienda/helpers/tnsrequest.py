@@ -67,10 +67,22 @@ class TNSRequest:
             json: Respuesta parseada a json si es exitosa. 
         """
         if response.status_code >= 400 and response.status_code < 600:
-            error = response.json()
-            if api_err_message and ( api_err_message.lower() in error['results'].lower() ):
-                raise ValueError(custom_err_message)
+            # Intentar parsear el contenido como JSON
+            try:
+                error = response.json()
+                # Verificar si el mensaje de error específico está en la respuesta
+                if api_err_message and (api_err_message.lower() in error.get('results', '').lower()):
+                    raise ValueError(custom_err_message)
+            except ValueError:
+                # Si ocurre un error al intentar parsear JSON, manejarlo como texto plano
+                error_text = response.text
+                if api_err_message and (api_err_message.lower() in error_text.lower()):
+                    raise ValueError(custom_err_message)
+                raise ValueError('Error inesperado en el servidor: ' + error_text)
+            
             raise ValueError('Estamos teniendo problemas con el servicio, por favor intente más tarde.' if not custom_err_message else custom_err_message)
+
+        # Retornar la respuesta JSON si el estado no es de error
         return response.json()
         
     def make_request(self, endpoint: str, queryparams: dict, method: str, api_err_message: str = None, custom_err_message:str = None):
@@ -153,6 +165,8 @@ class TNSRequest:
                     'ficha': ficha
                 },
                 endpoint=self.endpoints["prediales"]["pdf"],
+                api_err_message='Algo ha fallado: No fue posible generar factura',
+                custom_err_message='¡Te felicito! estas al día con tus impuestos, de esta manera estás contribuyendo para hacer de Villa del Rosario, una ciudad posible.'
             )
         except Exception as e:
             raise
@@ -211,7 +225,7 @@ class TNSRequest:
                 },
                 endpoint=self.endpoints['ica']['historial'],
                 api_err_message='Ha ocurrido un error',
-                custom_err_message=f'No se han encontrado historico de pagos asociados a la plata *{placa}*'
+                custom_err_message=f'No se han encontrado historico de pagos asociados a la placa *{placa}*'
             )
         except Exception as e:
             raise
