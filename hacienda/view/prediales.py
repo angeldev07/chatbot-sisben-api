@@ -166,19 +166,19 @@ def getpredialpdf(request: Request):
         
         prediales = predialObj.prediales.split(' ')
 
+
         if predialOption is None or not predialOption.isnumeric():
             return Response({'mensaje': 'La opcion no es correcta. Ingresa una de las opciones indicadas anteriormente.'}, status=status.HTTP_400_BAD_REQUEST)
 
         predialOption = int(predialOption)
         
         # se valida que el usuario ingrese una opcion valida dependiendo de la cantidad de prediales que tenga. 
-        if not (1 <= int(predialOption) < len(prediales)):
+        if predialOption <= 0 or predialOption > len(prediales):
             return Response({'mensaje': 'La opcion no es correcta. Ingresa una de las opciones indicadas anteriormente.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
+          
         # se obtiene el pdf y el link de pago
         response = tns.getpaymethod(prediales[predialOption-1])
-        print(response)
+
         # Crear el nombre del archivo y definir su ruta de acceso
         filename = f'predial-{prediales[predialOption-1]}.pdf'
         path = os.path.join(settings.MEDIA_ROOT, f'{filename}')
