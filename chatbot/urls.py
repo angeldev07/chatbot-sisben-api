@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/sisben/', include('sisben.urls')),
     path('api/hacienda/', include('hacienda.urls')),
     path('tns-predial-pago-online/<str:short_id>/', redirectToOriginalLink, name='redirectToOriginalLink'),
+    path('api/secretaria-desarrollo/', include('secretaria_desarrollo.urls')),
     # swagger
     path('doc', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
