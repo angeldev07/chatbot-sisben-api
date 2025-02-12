@@ -8,7 +8,7 @@ services:
     volumes:
       - media_volume:/app/media
     ports:
-      - "8000:8000"
+      - "9010:8000"
     container_name: apiChatbotAVR
     environment:
       - SECRET_KEY=${SECRET_KEY}
@@ -18,10 +18,11 @@ services:
       - PASSWD=${PASSWD}
       - TNSTOKEN=${TNSTOKEN}
     networks:
-      - chatbotavr
+      - general
+    restart: unless-stopped
 
 networks:
-  chatbotavr:
+  general:
     driver: bridge
     external: true
 
