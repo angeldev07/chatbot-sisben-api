@@ -29,13 +29,7 @@ tns = TNSRequest()
             openapi.IN_QUERY,
             description="Número de documento de la persona",
             type=openapi.TYPE_STRING,
-        ),
-        openapi.Parameter(
-            "apiKey",
-            openapi.IN_QUERY,
-            description="Api key para autenticar la consulta",
-            type=openapi.TYPE_STRING,
-        ),
+        )
     ],
     responses={
         200: openapi.Response(
@@ -111,12 +105,6 @@ def getprediales(request: Request):
             "opcion",
             openapi.IN_QUERY,
             description="Número de la opción de predial que desea consultar",
-            type=openapi.TYPE_STRING,
-        ),
-        openapi.Parameter(
-            "apiKey",
-            openapi.IN_QUERY,
-            description="Api key para autenticar la consulta",
             type=openapi.TYPE_STRING,
         ),
     ],
@@ -237,13 +225,7 @@ def getpredialpdf(request: Request):
             openapi.IN_QUERY,
             description="Número de documento de la persona",
             type=openapi.TYPE_STRING,
-        ),
-        openapi.Parameter(
-            "apiKey",
-            openapi.IN_QUERY,
-            description="Api key para autenticar la consulta",
-            type=openapi.TYPE_STRING,
-        ),
+        )
     ],
     responses={
         200: openapi.Response(

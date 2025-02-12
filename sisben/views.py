@@ -44,12 +44,6 @@ import os
             description="Número de documento de la persona",
             type=openapi.TYPE_STRING,
         ),
-        openapi.Parameter(
-            "apiKey",
-            openapi.IN_QUERY,
-            description="Api key para autenticar la consulta",
-            type=openapi.TYPE_STRING,
-        ),
     ],
     responses={
         200: openapi.Response(
@@ -154,12 +148,6 @@ def sisben(request: Request):
             "numDoc",
             openapi.IN_QUERY,
             description="Número de documento de la persona",
-            type=openapi.TYPE_STRING,
-        ),
-        openapi.Parameter(
-            "apiKey",
-            openapi.IN_QUERY,
-            description="Api key para autenticar la consulta",
             type=openapi.TYPE_STRING,
         ),
     ],
