@@ -8,6 +8,22 @@ class SisbenSession():
         self.initial_url = 'https://reportes.sisben.gov.co/dnp_sisbenconsulta'
         self.critical_error_mssg = 'Lo sentimos, la pagina del Sisben no responde en este momento. Por favor, intenta de nuevo mas tarde.'
         self.session = requests.Session()
+        
+        # Configurar headers para simular un navegador real
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
+        })
+        
         try:
             self.verify_token = self.get_token_from_request()
         except Exception as e:
@@ -18,6 +34,22 @@ class SisbenSession():
         self.session.close() # Cerrar la sesión actual
         # Crear una nueva sesión y obtenemos el token de esa nueva sesión
         self.session = requests.Session()
+        
+        # Reconfigurar headers para la nueva sesión
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
+        })
+        
         try:
             self.verify_token = self.get_token_from_request()
         except Exception as e:
@@ -48,7 +80,7 @@ class SisbenSession():
             str: Token de la página web.
         """
         try:
-            response = self.session.get(self.initial_url, timeout=5)
+            response = self.session.get(self.initial_url, timeout=10)
 
            
             if response.status_code != 200:
@@ -83,7 +115,24 @@ class SisbenSession():
                     'documento': docNumber,
                 }
 
-                response = self.session.post(self.initial_url, data=data, timeout=5, cookies=self.session.cookies)
+                # Headers adicionales para el POST request
+                post_headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Origin': 'https://reportes.sisben.gov.co',
+                    'Referer': 'https://reportes.sisben.gov.co/dnp_sisbenconsulta',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'same-origin',
+                    'Sec-Fetch-User': '?1'
+                }
+
+                response = self.session.post(
+                    self.initial_url, 
+                    data=data, 
+                    timeout=10, 
+                    cookies=self.session.cookies,
+                    headers=post_headers
+                )
 
                 if response.status_code == 200:
                     return response
